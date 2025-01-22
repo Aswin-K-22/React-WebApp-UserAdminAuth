@@ -1,29 +1,22 @@
 import jwt from 'jsonwebtoken';
 
-const authenticateToken = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
     try {
-        // Check if the authorization header is present
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(403).json({ message: 'No token provided or invalid format' });
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ isAuthenticated: false, message: 'Unauthorized access' });
         }
 
-        // Extract the token
-        const token = authHeader.split(' ')[1];
-
-        // Verify the token
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ message: 'Invalid or expired token' });
-            }
-
-            // Attach user data to the request object
-            req.user = user;
-            next();
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error: error.message });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        const message =
+            err.name === 'TokenExpiredError'
+                ? 'Token has expired'
+                : 'Invalid token';
+        res.status(401).json({ isAuthenticated: false, message });
     }
 };
 
-export { authenticateToken };
+export { authMiddleware };
