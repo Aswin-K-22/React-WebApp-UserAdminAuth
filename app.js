@@ -44,9 +44,17 @@ if (!fs.existsSync(uploadDir)) {
 app.use(cookieParser());
 
 
+app.use((req, res, next) => {
+  const currentTime = new Date().toLocaleString(); // Format the current time
+  console.log(`[${currentTime}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Routes
 import  UserRoutes from  './routes/userRoutes.js';
+import AdminRoutes from './routes/adminRoutes.js';
 app.use('/user', UserRoutes);
+app.use('/admin',  AdminRoutes);
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

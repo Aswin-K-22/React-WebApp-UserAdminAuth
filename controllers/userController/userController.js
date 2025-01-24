@@ -69,7 +69,8 @@ const loginUser = async (req, res) => {
         });
 
 
-        res.status(200).json({ message: 'Login successful', token , name : user.name  });
+        res.status(200).json({ message: 'Login successful', token , name : user.name ,
+            profilePhoto : user.profilePhoto });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -107,63 +108,38 @@ const fetchUserData = async (req, res) => {
 
 
 
-const uploadDir = path.resolve('uploads');
+
 
 
 const uploadProfilePic = async (req, res) => {
-  try {
-      const { image } = req.body;
-      console.log('Image received:', image[470]);
-
-      if (!image || !/^data:image\/\w+;base64,/.test(image)) {
-          console.error('Invalid Base64 image format:', image);
-          return res.status(400).json({ error: 'Invalid image format!' });
+    try {
+      const { userId = req.user.id, imageUrl } = req.body;
+  
+      // Validate required fields
+      if (!userId || !imageUrl) {
+        return res.status(400).json({ error: 'User ID and Image URL are required!' });
       }
-
-      const userId = req.user.id;
-
+  
+      // Find user in the database
       const user = await User.findById(userId);
       if (!user) {
-          return res.status(404).json({ message: 'User not found!' });
+        return res.status(404).json({ message: 'User not found!' });
       }
-
-      const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      const imageFileName = `${userId}-profile-pic.jpg`;
-      const outputPath = path.join(uploadDir, imageFileName);
-
-      console.log('Buffer:', buffer);
-      console.log('Output path:', outputPath);
-
-      await sharp(buffer)
-          .resize(300, 300)
-          .jpeg({ quality: 90 })
-          .toFile(outputPath)
-          .catch(err => {
-              console.error('Error saving file with sharp:', err);
-              throw new Error('File saving failed');
-          });
-
-      // if (user.profilePhoto && user.profilePhoto !== 'Profile Pic') {
-      //     const oldImagePath = path.join(uploadDir, path.basename(user.profilePhoto));
-      //     if (fs.existsSync(oldImagePath)) {
-      //         fs.unlinkSync(oldImagePath);
-      //     }
-      // }
-
-      user.profilePhoto = `/uploads/${imageFileName}`;
+  
+      // Update user's profile photo
+      user.profilePhoto = imageUrl;
       await user.save();
-
+  
       return res.status(200).json({
-          message: 'Profile picture updated successfully!',
-          profilePhoto: user.profilePhoto,
+        message: 'Profile picture updated successfully!',
+        profilePhoto: user.profilePhoto,
       });
-  } catch (error) {
+    } catch (error) {
       console.error('Error handling profile picture:', error);
       return res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
+    }
+  };
+  
 
 
 
