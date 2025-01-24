@@ -26,9 +26,9 @@ const loginAdmin = async (req, res) => {
 
         res.cookie('tokenAdmin', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Enable in production for HTTPS
-            sameSite: 'strict', // CSRF protection
-            maxAge: 3600000, // 1 hour
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict', 
+            maxAge: 3600000,
         });
 
         res.status(200).json({ message: 'Login successful', token, name: admin.name });
@@ -39,7 +39,6 @@ const loginAdmin = async (req, res) => {
 };
 
 
-// Logout Admin
 const logoutAdmin = (req, res) => {
     try {
         res.clearCookie('tokenAdmin', {
@@ -56,7 +55,7 @@ const logoutAdmin = (req, res) => {
 
 const fetchAllUsers = async (req, res) => {
     try {
-        const users = await User.find({ isAdmin: false }).select('-password'); // Exclude password
+        const users = await User.find({ isAdmin: false }).select('-password'); 
 
         if (!users || users.length === 0) {
             return res.status(404).json({ message: 'No users found' });

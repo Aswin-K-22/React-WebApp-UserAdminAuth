@@ -33,9 +33,9 @@ const registerUser = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Enable in production
-            sameSite: 'strict', // Prevent CSRF
-            maxAge: 3600000, // 1 hour
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict',
+            maxAge: 3600000,
         });
 
 
@@ -63,9 +63,9 @@ const loginUser = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Enable in production
-            sameSite: 'strict', // Prevent CSRF
-            maxAge: 3600000, // 1 hour
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict',
+            maxAge: 3600000, 
         });
 
 
@@ -115,18 +115,15 @@ const uploadProfilePic = async (req, res) => {
     try {
       const { userId = req.user.id, imageUrl } = req.body;
   
-      // Validate required fields
       if (!userId || !imageUrl) {
         return res.status(400).json({ error: 'User ID and Image URL are required!' });
       }
   
-      // Find user in the database
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: 'User not found!' });
       }
   
-      // Update user's profile photo
       user.profilePhoto = imageUrl;
       await user.save();
   
